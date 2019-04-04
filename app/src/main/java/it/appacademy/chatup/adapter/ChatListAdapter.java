@@ -138,10 +138,12 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         if (sonoIo){
             holder.params.gravity = Gravity.END;
             holder.autore.setTextColor(Color.BLUE);
+            holder.messaggio.setBackgroundResource(R.drawable.in_msg_bg);
         }
         else {
             holder.params.gravity = Gravity.START;
             holder.autore.setTextColor(Color.MAGENTA);
+            holder.messaggio.setBackgroundResource(R.drawable.out_msg_bg);
 
         }
         holder.autore.setLayoutParams(holder.params);
