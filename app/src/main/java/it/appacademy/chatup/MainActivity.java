@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -19,6 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import it.appacademy.chatup.adapter.ChatListAdapter;
 import it.appacademy.chatup.model.Messaggio;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
     //UI
     private EditText mInputText;
     private Button mButtonInvia;
+
+    private ChatListAdapter chatListAdapter;
+    private RecyclerView rvChatMsg;
 
 
     @Override
@@ -52,8 +58,16 @@ public class MainActivity extends AppCompatActivity {
         
         initUI();
 
+        //Riferimento alla RecyclerView
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        rvChatMsg.setLayoutManager(linearLayoutManager);
+
         //Riferimento alla locazione del database generale
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
+        //Creo l'oggetto Adapter
+        chatListAdapter = new ChatListAdapter(this, mDatabaseReference, mAuth.getCurrentUser().getDisplayName());
+        rvChatMsg.setAdapter(chatListAdapter);
 
         // TODO 3: Presentare dati all'utente attraverso un Toast
         Toast.makeText(this,"Utente : "+ extra, Toast.LENGTH_SHORT).show();
@@ -68,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private void initUI() {
         mInputText = (EditText) findViewById(R.id.et_messaggio);
         mButtonInvia = (Button) findViewById(R.id.btn_invia);
+        rvChatMsg = (RecyclerView) findViewById(R.id.rv_chat);
 
         //Tasto enter
         mInputText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -150,5 +165,13 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intToLogin);
         }
 
+    }
+
+    //Quando l'activity entra in onstop possiamo rimuovere il listener
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        chatListAdapter.clean();
     }
 }

@@ -3,9 +3,11 @@ package it.appacademy.chatup.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,27 +40,38 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
 
 
 
-        //Chiamato quando viene aggiunto un nuovo figlio
+        //Chiamato quando viene aggiunto un nuovo messaggio
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
+            //vogliamo sapere tutti i nodi figli del nodo messaggi
+            //DataSnaphot è il messaggio in formato .json
+            mDataSnapshot.add(dataSnapshot);
+
+            //Notifichiamo che c'è stato un cambiamento sui dati
+            notifyDataSetChanged();
+
         }
 
+        //Chiamato quando un messaggio cambia
         @Override
         public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
         }
 
+        //Chiamato quando un messaggio viene rimosso
         @Override
         public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
         }
 
+        //Chiamato quando un messaggio viene spostato
         @Override
         public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
         }
 
+        //Chiamato quando un messaggio viene cancellato
         @Override
         public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -70,6 +83,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         mDataBaseRefence = ref.child("messaggi");
         mDisplayName = name;
         mDataSnapshot = new ArrayList<>();
+
+        //Colleghiamo il database all'adapter e al listener
+        mDataBaseRefence.addChildEventListener(mListener);
 
     }
 
@@ -112,10 +128,34 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatVi
         holder.autore.setText(msg.getAutore());
         holder.messaggio.setText(msg.getMessaggio());
 
+        boolean sonoIo = msg.getAutore().equals(mDisplayName);
+        setChatItemStyle(sonoIo, holder);
+
+    }
+
+    private void setChatItemStyle(boolean sonoIo, ChatViewHolder holder){
+
+        if (sonoIo){
+            holder.params.gravity = Gravity.END;
+            holder.autore.setTextColor(Color.BLUE);
+        }
+        else {
+            holder.params.gravity = Gravity.START;
+            holder.autore.setTextColor(Color.MAGENTA);
+
+        }
+        holder.autore.setLayoutParams(holder.params);
+        holder.messaggio.setLayoutParams(holder.params);
+
     }
 
     @Override
     public int getItemCount() {
         return mDataSnapshot.size();
     }
+
+    public void clean(){
+        mDataBaseRefence.removeEventListener(mListener);
+    }
+
 }
